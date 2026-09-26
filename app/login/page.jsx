@@ -71,7 +71,11 @@ export default function LoginPage() {
 
       // Clear any demo profile override
       localStorage.removeItem('demo_user_profile');
-      router.push(profile.role === 'admin' ? '/admin' : '/checkout');
+
+      // Allow session storage to persist before navigation
+      await new Promise((r) => setTimeout(r, 200));
+      const targetUrl = profile?.role === 'admin' ? '/admin' : '/checkout';
+      window.location.href = targetUrl;
     } catch (err) {
       console.error('Sign-in error:', err);
       setError(err.message || 'Failed to sign in. Please verify your Supabase API keys.');
