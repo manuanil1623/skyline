@@ -1,0 +1,23 @@
+# Dependencies and build output
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+coverage/
+
+# Secrets and local settings
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+!**/.env.local.example
+
+# Hosting and operating-system files
+**/.vercel/
+**/.render/
+.DS_Store
+npm-debug.log*
+
+# Unused blank Next.js starter nested in the API folder
+backend/frontend-app/
