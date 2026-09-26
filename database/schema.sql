@@ -36,16 +36,30 @@ create table if not exists profiles (
 );
 
 -- Auto-create a profile row whenever a new auth user signs up.
-create or replace function handle_new_user()
+create or replace function public.handle_new_user()
 returns trigger as $$
+declare
+  user_role_val public.user_role := 'handler';
+  user_name_val text := 'New Staff';
 begin
+  if new.raw_user_meta_data is not null then
+    if new.raw_user_meta_data->>'full_name' is not null then
+      user_name_val := new.raw_user_meta_data->>'full_name';
+    end if;
+    if new.raw_user_meta_data->>'role' = 'admin' then
+      user_role_val := 'admin';
+    end if;
+  end if;
+
   insert into public.profiles (id, full_name, role)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', 'New Staff'),
-          coalesce((new.raw_user_meta_data->>'role')::user_role, 'handler'))
+  values (new.id, user_name_val, user_role_val)
   on conflict (id) do nothing;
+
+  return new;
+exception when others then
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
