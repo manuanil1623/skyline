@@ -53,7 +53,7 @@ export default function AdminPage() {
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#A63D5B]" />
           <span className="text-xs font-semibold uppercase tracking-wider text-[#2E1620]">
-            Rosé &amp; Co. Admin Portal
+            Skyline Beauty Parlour Admin Portal
           </span>
           <span className="text-xs text-[#8a767d]">({profile?.full_name})</span>
         </div>

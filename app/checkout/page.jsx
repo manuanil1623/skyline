@@ -36,7 +36,7 @@ export default function CheckoutPage() {
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#6B8F71]" />
           <span className="text-xs font-semibold uppercase tracking-wider text-[#2E1620]">
-            Rosé &amp; Co. Front Desk
+            Skyline Beauty Parlour Front Desk
           </span>
           <span className="text-xs text-[#8a767d]">({profile?.full_name} · {profile?.role})</span>
         </div>
