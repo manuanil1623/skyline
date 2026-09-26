@@ -1,0 +1,10 @@
+{
+  "name": "skyline-beauty-parlour-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend-app && npm run dev",
+    "build": "cd frontend-app && npm run build",
+    "start": "cd frontend-app && npm run start"
+  }
+}
