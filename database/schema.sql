@@ -35,36 +35,9 @@ create table if not exists profiles (
   created_at    timestamptz not null default now()
 );
 
--- Auto-create a profile row whenever a new auth user signs up.
-create or replace function public.handle_new_user()
-returns trigger as $$
-declare
-  user_role_val public.user_role := 'handler';
-  user_name_val text := 'New Staff';
-begin
-  if new.raw_user_meta_data is not null then
-    if new.raw_user_meta_data->>'full_name' is not null then
-      user_name_val := new.raw_user_meta_data->>'full_name';
-    end if;
-    if new.raw_user_meta_data->>'role' = 'admin' then
-      user_role_val := 'admin';
-    end if;
-  end if;
-
-  insert into public.profiles (id, full_name, role)
-  values (new.id, user_name_val, user_role_val)
-  on conflict (id) do nothing;
-
-  return new;
-exception when others then
-  return new;
-end;
-$$ language plpgsql security definer set search_path = public;
-
+-- Remove trigger on auth.users to allow seamless user creation in Supabase Auth Dashboard
 drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure handle_new_user();
+drop function if exists public.handle_new_user();
 
 -- ---------------------------------------------------------------------
 -- 3. SERVICES CATALOG
@@ -174,6 +147,8 @@ drop policy if exists "admin manage items" on transaction_items;
 -- Re-create policies
 create policy "read own profile" on profiles for select
   using (id = auth.uid() or is_admin());
+create policy "users insert own profile" on profiles for insert
+  with check (auth.uid() = id or is_admin());
 create policy "admin manages profiles" on profiles for all
   using (is_admin());
 

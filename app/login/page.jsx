@@ -29,16 +29,30 @@ export default function LoginPage() {
         return;
       }
 
-      const { data: profile, error: profileError } = await supabase
+      let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role, is_active')
         .eq('id', data.user.id)
         .single();
 
       if (profileError || !profile) {
-        setError('No staff profile found for this account in Supabase.');
-        setLoading(false);
-        return;
+        // Auto-provision profile for signed-in user if missing
+        const { data: countData } = await supabase.from('profiles').select('id', { count: 'exact', head: true });
+        const isFirstUser = !countData || countData.length === 0;
+        const initialRole = isFirstUser ? 'admin' : 'handler';
+
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            full_name: email.split('@')[0] || 'Staff User',
+            role: initialRole,
+            is_active: true,
+          })
+          .select('role, is_active')
+          .single();
+
+        profile = newProfile || { role: initialRole, is_active: true };
       }
       if (!profile.is_active) {
         setError('This account has been deactivated. Contact the owner.');
