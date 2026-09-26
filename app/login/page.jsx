@@ -21,8 +21,15 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
+    const cleanEmail = (email || '').trim().replace(/[^\x20-\x7E]/g, '');
+    const cleanPassword = (password || '').trim();
+
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPassword,
+      });
+
       if (signInError) {
         setError(signInError.message);
         setLoading(false);
@@ -45,7 +52,7 @@ export default function LoginPage() {
           .from('profiles')
           .upsert({
             id: data.user.id,
-            full_name: email.split('@')[0] || 'Staff User',
+            full_name: cleanEmail.split('@')[0] || 'Staff User',
             role: initialRole,
             is_active: true,
           })
@@ -54,6 +61,7 @@ export default function LoginPage() {
 
         profile = newProfile || { role: initialRole, is_active: true };
       }
+
       if (!profile.is_active) {
         setError('This account has been deactivated. Contact the owner.');
         await supabase.auth.signOut();
@@ -65,7 +73,8 @@ export default function LoginPage() {
       localStorage.removeItem('demo_user_profile');
       router.push(profile.role === 'admin' ? '/admin' : '/checkout');
     } catch (err) {
-      setError(err.message || 'Failed to sign in');
+      console.error('Sign-in error:', err);
+      setError(err.message || 'Failed to sign in. Please verify your Supabase API keys.');
       setLoading(false);
     }
   };
